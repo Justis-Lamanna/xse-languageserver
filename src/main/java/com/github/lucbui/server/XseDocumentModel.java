@@ -96,23 +96,33 @@ public class XseDocumentModel {
             //oldLines: Lines being modified
             //afterLines: Lines after the modification
             List<Line> beforeLines, oldLines, afterLines;
-            beforeLines = IntStream.range(0, change.getRange().getStart().getLine())
+            beforeLines = IntStream.range(0, startLine)
                     .mapToObj(lines::get)
                     .collect(Collectors.toList());
-            oldLines = IntStream.rangeClosed(change.getRange().getStart().getLine(), change.getRange().getEnd().getLine())
+            oldLines = IntStream.rangeClosed(startLine, endLine)
                     .mapToObj(this::get)
                     .collect(Collectors.toList());
-            afterLines = IntStream.range(change.getRange().getEnd().getLine() + 1, lines.size())
+            afterLines = IntStream.range(endLine + 1, lines.size())
                     .mapToObj(lines::get)
                     .collect(Collectors.toList());
             String text = change.getText();
 
             if (text.isEmpty()) {
                 //Deletions
-                lines = new ArrayList<>(beforeLines.size() + afterLines.size() + 2);
+                lines = new ArrayList<>(beforeLines.size() + afterLines.size() + 1);
                 lines.addAll(beforeLines);
 
-                //TODO: Delete Logic.
+                if(oldLines.isEmpty()){
+                    throw new RuntimeException("There's no way this really happened, right...?");
+                } else {
+                    String topExistingLine = oldLines.get(0).getLine();
+                    String bottomExistingLine = oldLines.get(oldLines.size() - 1).getLine();
+                    String preExistingLine = (startChar == 0 ? "" : topExistingLine.substring(0, startChar));
+                    String postExistingLine = (endChar == bottomExistingLine.length() ? "" : bottomExistingLine.substring(endChar));
+                    if(!preExistingLine.isEmpty() || !postExistingLine.isEmpty()) {
+                        lines.add(new Line(preExistingLine + postExistingLine));
+                    }
+                }
 
                 lines.addAll(afterLines);
             } else {
@@ -148,7 +158,7 @@ public class XseDocumentModel {
     public class Line {
         private String line;
 
-        public Line(String line){
+        private Line(String line){
             this.line = line;
         }
 
@@ -156,7 +166,7 @@ public class XseDocumentModel {
             return line;
         }
 
-        public void setLine(String line) {
+        private void setLine(String line) {
             this.line = line;
         }
     }
