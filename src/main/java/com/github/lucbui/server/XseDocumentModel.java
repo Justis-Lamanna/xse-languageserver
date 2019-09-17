@@ -105,12 +105,12 @@ public class XseDocumentModel {
             afterLines = IntStream.range(endLine + 1, lines.size())
                     .mapToObj(lines::get)
                     .collect(Collectors.toList());
+            List<Line> newLines;
             String text = change.getText();
 
             if (text.isEmpty()) {
                 //Deletions
-                lines = new ArrayList<>(beforeLines.size() + afterLines.size() + 1);
-                lines.addAll(beforeLines);
+                newLines = new ArrayList<>();
 
                 if(oldLines.isEmpty()){
                     throw new RuntimeException("There's no way this really happened, right...?");
@@ -120,14 +120,12 @@ public class XseDocumentModel {
                     String preExistingLine = (startChar == 0 ? "" : topExistingLine.substring(0, startChar));
                     String postExistingLine = (endChar == bottomExistingLine.length() ? "" : bottomExistingLine.substring(endChar));
                     if(!preExistingLine.isEmpty() || !postExistingLine.isEmpty()) {
-                        lines.add(new Line(preExistingLine + postExistingLine));
+                        newLines.add(new Line(preExistingLine + postExistingLine));
                     }
                 }
-
-                lines.addAll(afterLines);
             } else {
                 //Additions
-                List<Line> newLines = getLines(change.getText())
+                newLines = getLines(change.getText())
                         .map(Line::new)
                         .collect(Collectors.toList());
                 if (text.endsWith("\n")) {
@@ -145,13 +143,12 @@ public class XseDocumentModel {
                     String suffix = (endChar < oldLastLine.length()) ? oldLastLine.substring(endChar) : "";
                     newLines.get(newLines.size() - 1).setLine(newLastLine + suffix);
                 }
-
-                //Combine everything together again
-                lines = new ArrayList<>(beforeLines.size() + newLines.size() + afterLines.size());
-                lines.addAll(beforeLines);
-                lines.addAll(newLines);
-                lines.addAll(afterLines);
             }
+            //Combine everything together again
+            lines = new ArrayList<>(beforeLines.size() + newLines.size() + afterLines.size());
+            lines.addAll(beforeLines);
+            lines.addAll(newLines);
+            lines.addAll(afterLines);
         }
     }
 
