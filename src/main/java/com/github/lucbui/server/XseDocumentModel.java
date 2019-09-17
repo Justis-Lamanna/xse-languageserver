@@ -1,7 +1,8 @@
 package com.github.lucbui.server;
 
+import com.github.lucbui.server.parse.LineProcessor;
+import com.github.lucbui.server.parse.XseLineProcessor;
 import com.github.lucbui.server.util.Pair;
-import com.github.lucbui.server.util.WithLineNumber;
 import org.eclipse.lsp4j.TextDocumentContentChangeEvent;
 
 import java.io.BufferedReader;
@@ -9,7 +10,6 @@ import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
@@ -19,7 +19,10 @@ public class XseDocumentModel {
     private String text;
     private List<Line> lines;
 
+    private LineProcessor lineProcessor;
+
     public XseDocumentModel(String text){
+        this.lineProcessor = new XseLineProcessor();
         this.text = text;
         compile();
     }
@@ -31,6 +34,8 @@ public class XseDocumentModel {
         lines = getLines(text)
                 .map(Line::new)
                 .collect(Collectors.toList());
+
+        processLines(addLineNumberToLine(lines, 0));
     }
 
     private static Stream<String> getLines(String text){
@@ -149,6 +154,20 @@ public class XseDocumentModel {
             lines.addAll(beforeLines);
             lines.addAll(newLines);
             lines.addAll(afterLines);
+
+            processLines(addLineNumberToLine(newLines, beforeLines.size() + 1));
+        }
+    }
+
+    private static List<Pair<Integer, Line>> addLineNumberToLine(List<Line> lines, int start){
+        return IntStream.range(start, start + lines.size())
+                .mapToObj(i -> new Pair<>(i, lines.get(i)))
+                .collect(Collectors.toList());
+    }
+
+    private void processLines(List<Pair<Integer, Line>> lines){
+        for(Pair<Integer, Line> line : lines){
+            lineProcessor.processLine(this, line.getKey(), line.getValue());
         }
     }
 
