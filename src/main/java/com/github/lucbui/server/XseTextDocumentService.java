@@ -1,6 +1,6 @@
 package com.github.lucbui.server;
 
-import com.github.lucbui.server.util.Pair;
+import com.github.lucbui.util.Pair;
 import org.eclipse.lsp4j.*;
 import org.eclipse.lsp4j.services.TextDocumentService;
 

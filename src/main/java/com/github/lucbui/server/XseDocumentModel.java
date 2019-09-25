@@ -1,15 +1,16 @@
 package com.github.lucbui.server;
 
+import com.github.lucbui.line.CommandLine;
+import com.github.lucbui.line.UnfinishedCommand;
+import com.github.lucbui.line.UnknownCommand;
 import com.github.lucbui.server.parse.LineProcessor;
 import com.github.lucbui.server.parse.XseLineProcessor;
-import com.github.lucbui.server.util.Pair;
+import com.github.lucbui.util.Pair;
 import org.eclipse.lsp4j.TextDocumentContentChangeEvent;
 
 import java.io.BufferedReader;
 import java.io.StringReader;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
@@ -21,9 +22,15 @@ public class XseDocumentModel {
 
     private LineProcessor lineProcessor;
 
+    private Map<Integer, UnknownCommand> unknownCommands;
+    private Map<Integer, UnfinishedCommand> unfinishedCommands;
+
     public XseDocumentModel(String text){
         this.lineProcessor = new XseLineProcessor();
         this.text = text;
+
+        this.unfinishedCommands = new HashMap<>();
+
         compile();
     }
 
@@ -171,7 +178,23 @@ public class XseDocumentModel {
         }
     }
 
-    public class Line {
+    public void addUnfinishedCommand(int lineNumber, UnfinishedCommand unfinishedCommand){
+        this.unfinishedCommands.put(lineNumber, unfinishedCommand);
+    }
+
+    public void removeUnfinishedCommand(int lineNumber) {
+        this.unfinishedCommands.remove(lineNumber);
+    }
+
+    public void addUnknownCommand(int lineNumber, UnknownCommand unknownCommand){
+        this.unknownCommands.put(lineNumber, unknownCommand);
+    }
+
+    public void removeUnknownCommand(int lineNumber) {
+        this.unknownCommands.remove(lineNumber);
+    }
+
+    public static class Line {
         private String line;
 
         private Line(String line){

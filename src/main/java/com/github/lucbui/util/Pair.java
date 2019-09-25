@@ -1,4 +1,4 @@
-package com.github.lucbui.server.util;
+package com.github.lucbui.util;
 
 /**
  * Standard class which pairs two objects together.

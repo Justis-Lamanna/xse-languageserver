@@ -1,4 +1,4 @@
-package com.github.lucbui.server.util;
+package com.github.lucbui.util;
 
 import java.util.EnumSet;
 import java.util.HashMap;
