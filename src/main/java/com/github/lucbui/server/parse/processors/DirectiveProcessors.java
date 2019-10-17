@@ -1,6 +1,7 @@
-package com.github.lucbui.server.parse.directive;
+package com.github.lucbui.server.parse.processors;
 
 import com.github.lucbui.line.CommandLine;
+import com.github.lucbui.util.ListToOptionalCollector;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -9,23 +10,23 @@ public enum DirectiveProcessors {
     DEFINE("#define",null, 2);
 
     private final String key;
-    private final DirectiveProcessor processor;
+    private final Processor processor;
     private final int parameterCount;
 
-    DirectiveProcessors(String key, DirectiveProcessor processor, int parameterCount) {
+    DirectiveProcessors(String key, Processor processor, int parameterCount) {
         this.key = key;
         this.processor = processor;
         this.parameterCount = parameterCount;
     }
 
-    public DirectiveProcessor getProcessor() {
+    public Processor getProcessor() {
         return processor;
     }
 
-    public static List<DirectiveProcessors> getProcessor(CommandLine commandLine){
+    public static Optional<DirectiveProcessors> getProcessor(CommandLine commandLine){
         return Arrays.stream(values())
                 .filter(p -> p.key.equals(commandLine.getCommand()))
                 .filter(p -> p.parameterCount == commandLine.getParameters().length)
-                .collect(Collectors.toList());
+                .collect(new ListToOptionalCollector<>());
     }
 }
