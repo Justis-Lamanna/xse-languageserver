@@ -2,6 +2,7 @@ package com.github.lucbui.util;
 
 import com.github.lucbui.line.CommandLine;
 
+import java.util.OptionalLong;
 import java.util.regex.Pattern;
 
 /**
@@ -33,5 +34,17 @@ public class CommandUtils {
             return false;
         }
         return command.getCommand().startsWith(PREPROCESSING_DIRECTIVE_DELIMITER);
+    }
+
+    public static OptionalLong parseLong(String string) {
+        try {
+            if (string.startsWith("0x") || string.startsWith("&H")) {
+                return OptionalLong.of(Long.parseUnsignedLong(string.substring(2), 16));
+            } else {
+                return OptionalLong.of(Long.parseUnsignedLong(string, 10));
+            }
+        } catch (NumberFormatException ex) {
+            return OptionalLong.empty();
+        }
     }
 }

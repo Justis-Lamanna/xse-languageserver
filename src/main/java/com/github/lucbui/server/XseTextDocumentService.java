@@ -24,7 +24,7 @@ public class XseTextDocumentService implements TextDocumentService {
 
         CompletableFuture.runAsync(() -> {
             xseLanguageServer.getRemoteProxy()
-                    .publishDiagnostics(new PublishDiagnosticsParams(uri, runDiagnosticsOn(model)));
+                    .publishDiagnostics(new PublishDiagnosticsParams(uri, model.getDiagnostics()));
         });
     }
 
@@ -48,21 +48,9 @@ public class XseTextDocumentService implements TextDocumentService {
 
             CompletableFuture.runAsync(() -> {
                 xseLanguageServer.getRemoteProxy()
-                    .publishDiagnostics(new PublishDiagnosticsParams(uri, runDiagnosticsOn(model)));
+                    .publishDiagnostics(new PublishDiagnosticsParams(uri, model.getDiagnostics()));
             });
         }
-    }
-
-    private List<Diagnostic> runDiagnosticsOn(XseDocumentModel model){
-        List<Diagnostic> diagnostics = new ArrayList<>();
-        for(Pair<Integer, XseDocumentModel.Line> line : model.lines()){
-            if(line.getValue().getLine().equals("...")){
-                Range range = new Range(new Position(line.getKey(), 0), new Position(line.getKey(), 3));
-                Diagnostic diagnostic = new Diagnostic(range, "This is an ellipsis, you know.", DiagnosticSeverity.Error, "xse");
-                diagnostics.add(diagnostic);
-            }
-        }
-        return diagnostics;
     }
 
     @Override

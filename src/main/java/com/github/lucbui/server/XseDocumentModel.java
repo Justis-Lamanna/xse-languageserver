@@ -6,6 +6,7 @@ import com.github.lucbui.line.UnknownCommand;
 import com.github.lucbui.server.parse.LineProcessor;
 import com.github.lucbui.server.parse.XseLineProcessor;
 import com.github.lucbui.util.Pair;
+import org.eclipse.lsp4j.Diagnostic;
 import org.eclipse.lsp4j.TextDocumentContentChangeEvent;
 
 import java.io.BufferedReader;
@@ -22,14 +23,13 @@ public class XseDocumentModel {
 
     private LineProcessor lineProcessor;
 
-    private Map<Integer, UnknownCommand> unknownCommands;
-    private Map<Integer, UnfinishedCommand> unfinishedCommands;
+    private Map<Integer, List<Diagnostic>> diagnostics;
 
     public XseDocumentModel(String text){
         this.lineProcessor = new XseLineProcessor();
         this.text = text;
 
-        this.unfinishedCommands = new HashMap<>();
+        this.diagnostics = new HashMap<>();
 
         compile();
     }
@@ -162,7 +162,8 @@ public class XseDocumentModel {
             lines.addAll(newLines);
             lines.addAll(afterLines);
 
-            processLines(addLineNumberToLine(newLines, beforeLines.size() + 1));
+            deprocessLines(addLineNumberToLine(oldLines, startLine));
+            processLines(addLineNumberToLine(newLines, startLine));
         }
     }
 
@@ -172,26 +173,30 @@ public class XseDocumentModel {
                 .collect(Collectors.toList());
     }
 
+    private void deprocessLines(List<Pair<Integer, Line>> lines){
+        for(Pair<Integer, Line> line : lines){
+            lineProcessor.deprocessLine(this, line.getKey(), line.getValue());
+        }
+    }
+
     private void processLines(List<Pair<Integer, Line>> lines){
         for(Pair<Integer, Line> line : lines){
             lineProcessor.processLine(this, line.getKey(), line.getValue());
         }
     }
 
-    public void addUnfinishedCommand(int lineNumber, UnfinishedCommand unfinishedCommand){
-        this.unfinishedCommands.put(lineNumber, unfinishedCommand);
+    public void addDiagnostic(int linenumber, Diagnostic diagnostic) {
+        this.diagnostics.computeIfAbsent(linenumber, i -> new ArrayList<>()).add(diagnostic);
     }
 
-    public void removeUnfinishedCommand(int lineNumber) {
-        this.unfinishedCommands.remove(lineNumber);
+    public void clearDiagnostics(int linenumber) {
+        if(this.diagnostics.containsKey(linenumber)){
+            this.diagnostics.get(linenumber).clear();
+        }
     }
 
-    public void addUnknownCommand(int lineNumber, UnknownCommand unknownCommand){
-        this.unknownCommands.put(lineNumber, unknownCommand);
-    }
-
-    public void removeUnknownCommand(int lineNumber) {
-        this.unknownCommands.remove(lineNumber);
+    public List<Diagnostic> getDiagnostics(){
+        return this.diagnostics.values().stream().flatMap(List::stream).collect(Collectors.toList());
     }
 
     public static class Line {

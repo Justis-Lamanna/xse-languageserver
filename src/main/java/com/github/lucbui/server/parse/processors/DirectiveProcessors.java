@@ -2,12 +2,13 @@ package com.github.lucbui.server.parse.processors;
 
 import com.github.lucbui.line.CommandLine;
 import com.github.lucbui.util.ListToOptionalCollector;
+import com.github.lucbui.xse.XseLanguage;
 
 import java.util.*;
 import java.util.stream.Collectors;
 
 public enum DirectiveProcessors {
-    DEFINE("#define",null, 2);
+    DEFINE("#define", new DefineProcessor(), 2);
 
     private final String key;
     private final Processor processor;
@@ -20,6 +21,7 @@ public enum DirectiveProcessors {
     }
 
     public Processor getProcessor() {
+        XseLanguage.V1.getCommands().get(0).getParameters();
         return processor;
     }
 

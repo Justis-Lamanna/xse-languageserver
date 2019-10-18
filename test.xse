@@ -1,5 +1,1 @@
-Hello there!
-This is a test of our new change thingy.
-Changes happen. Delete's handle right too!
-This is the end.
-...
+#define HELLO_WORLD 31Z

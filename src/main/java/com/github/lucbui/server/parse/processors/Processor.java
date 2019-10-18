@@ -4,5 +4,7 @@ import com.github.lucbui.line.CommandLine;
 import com.github.lucbui.server.XseDocumentModel;
 
 public interface Processor {
-    void process(XseDocumentModel document, XseDocumentModel.Line line, CommandLine commandLine);
+    void process(XseDocumentModel document, int linenumber, XseDocumentModel.Line line, CommandLine commandLine);
+
+    void deprocess(XseDocumentModel document, int linenumber, XseDocumentModel.Line line, CommandLine commandLine);
 }
